@@ -11,12 +11,7 @@ mp_drawing = mp.solutions.drawing_utils
 
 
 icub = iCub()
-#        self.IGazeControl = 
-
-
 cap = cv2.VideoCapture(0)
-
-yaw_offset = None  # Offset to correct yaw when the head faces forward
 
 
 # Define a new keypoint as the midpoint eyes
@@ -37,6 +32,7 @@ while cap.isOpened():
 
     # Convert frame to RGB
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    rgb_frame = cv2.resize(rgb_frame, (640, 480))
     image_height, image_width, _ = frame.shape
 
     # Process frame with BlazePose

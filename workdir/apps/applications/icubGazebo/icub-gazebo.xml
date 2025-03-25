@@ -11,11 +11,13 @@
         <name>gzserver</name>
         <parameters>/workdir/apps/gazebo/icub-world.sdf</parameters>
         <node>$ENV{ICUBSRV_NODE}</node>
+        <environment>LIBGL_ALWAYS_SOFTWARE=false</environment>
     </module>
 
     <module>
         <name>gzclient</name>
         <node>$ENV{ICUBSRV_NODE}</node>
+        <environment>LIBGL_ALWAYS_SOFTWARE=false</environment>
     </module>
 
     <module>

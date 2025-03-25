@@ -25,3 +25,6 @@ ARG DOCKER_SRC
 FROM $DOCKER_SRC
 
 LABEL maintainer="Davide De Tommaso <davide.detommaso@iit.it>"
+
+RUN pip3 install -U opencv-python
+RUN pip3 install -U mediapipe

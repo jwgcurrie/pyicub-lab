@@ -36,7 +36,7 @@ class iTrackPeople:
             if yarp_image is None:
                 continue
 
-            # Convert YARP image to OpenCV format
+            # Convert YARP image to OpenCV (BGR order for OpenCV)
             h, w = yarp_image.height(), yarp_image.width()
             img = np.zeros((h, w, 3), dtype=np.uint8)
 
@@ -46,37 +46,43 @@ class iTrackPeople:
                     img[y, x, 0] = pixel.b
                     img[y, x, 1] = pixel.g
                     img[y, x, 2] = pixel.r
-            
+
+            # Convert to RGB for MediaPipe
             rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-
 
             # Process with MediaPipe
             results = self.pose.process(rgb)
             if results.pose_landmarks:
                 lm = results.pose_landmarks.landmark
-                if all(lm[i].visibility > 0.5 for i in [2, 5]):  # Left eye: 2, Right eye: 5
+                if all(lm[i].visibility > 0.5 for i in [2, 5]):
                     u, v, z = self.find_eye_midpoint(lm, [2, 5])
 
-                    # Output coordinates via YARP
-                    bottle = self.output_port.prepare()
-                    bottle.clear()
-                    bottle.addFloat32(u)
-                    bottle.addFloat32(v)
-                    bottle.addFloat32(z)
-                    self.output_port.write()
+                    if 0 <= u <= 1 and 0 <= v <= 1:
+                        # Send midpoint via YARP
+                        bottle = self.output_port.prepare()
+                        bottle.clear()
+                        bottle.addFloat32(u)
+                        bottle.addFloat32(v)
+                        bottle.addFloat32(z)
+                        self.output_port.write()
 
-                    # Visualization
-                    if self.display:
-                        cx, cy = int(u * w), int(v * h)
-                        cv2.circle(img, (cx, cy), 5, (0, 0, 255), -1)
+                        if self.display:
+                            cx, cy = int(u * w), int(v * h)
+                            cv2.circle(img, (cx, cy), 5, (0, 0, 255), -1)
+                    else:
+                        print("[iTrackPeople] Midpoint (u,v) out of bounds: u=%.2f, v=%.2f" % (u, v))
+                else:
+                    print("[iTrackPeople] Landmarks not confident enough.")
+            else:
+                print("[iTrackPeople] No pose landmarks detected.")
 
             if self.display:
                 cv2.imshow("iTrackPeople", img)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                if cv2.waitKey(5) & 0xFF == ord('q'):
                     break
 
         self.cleanup()
+
 
     def cleanup(self):
         print("[iTrackPeople] Shutting down...")

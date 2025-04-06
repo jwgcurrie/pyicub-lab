@@ -61,7 +61,7 @@ yarp connect /grabber /iTrackPeople/image:i
 Read the output:
 
 ```bash
-yarp read /iTrackPeople/eyes:o
+yarp read /anyname --from /iTrackPeople/eyes:o
 ```
 
 ---

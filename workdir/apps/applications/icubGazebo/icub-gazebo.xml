@@ -92,12 +92,18 @@
     <node>$ENV{ICUBSRV_NODE}</node>
     </module>
 
-    <connection>
-        <from>/grabber</from>   <!-- instead of /grabber/image:o -->
-        <to>/imageview</to>
+    <module>
+        <name>iTrackPeople</name>
+        <command>/usr/bin/python3 /workdir/apps/iTrackPeople/iTrackPeople.py --display > /tmp/iTrackPeople.log 2>&1</command>
+        <node>localhost</node>
+        <workingdir>/workdir/apps/iTrackPeople</workingdir>
+    </module>
+
+        <connection>
+        <from>/grabber</from>
+        <to>/iTrackPeople/image:i</to>
         <protocol>tcp</protocol>
     </connection>
-
 
     <connection>
         <from>/icubSim/cam/right/rgbImage:o</from>

@@ -57,20 +57,22 @@ class iTrackPeople:
                 if all(lm[i].visibility > 0.5 for i in [2, 5]):
                     u, v, z = self.find_eye_midpoint(lm, [2, 5])
 
-                    if 0 <= u <= 1 and 0 <= v <= 1:
-                        # Send midpoint via YARP
+                    # Convert to pixel coordinates
+                    cx, cy = int(u * w), int(v * h)
+
+                    if 0 <= cx < w and 0 <= cy < h:
+                        # Send pixel midpoint via YARP
                         bottle = self.output_port.prepare()
                         bottle.clear()
-                        bottle.addFloat32(u)
-                        bottle.addFloat32(v)
-                        bottle.addFloat32(z)
+                        bottle.addInt32(cx)
+                        bottle.addInt32(cy)
+                        bottle.addFloat32(z)  # Still normalized z
                         self.output_port.write()
 
                         if self.display:
-                            cx, cy = int(u * w), int(v * h)
                             cv2.circle(img, (cx, cy), 5, (0, 0, 255), -1)
                     else:
-                        print("[iTrackPeople] Midpoint (u,v) out of bounds: u=%.2f, v=%.2f" % (u, v))
+                        print("[iTrackPeople] Pixel midpoint out of bounds: cx=%d, cy=%d" % (cx, cy))
                 else:
                     print("[iTrackPeople] Landmarks not confident enough.")
             else:

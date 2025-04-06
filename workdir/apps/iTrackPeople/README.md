@@ -18,7 +18,7 @@
 | Port | Type | Description |
 |------|------|-------------|
 | `/iTrackPeople/image:i` | `yarp.ImageRgb` | Input image (typically from `/grabber`) |
-| `/iTrackPeople/eyes:o`  | `yarp.Bottle`   | Output of `(u, v, z)` as floats — the midpoint between the eyes |
+| `/iTrackPeople/eyes:o`  | `yarp.Bottle`   | Output of `(u, v, z)` as (int, int float) — the midpoint between the eyes |
 
 ---
 
@@ -69,12 +69,12 @@ yarp read /anyname --from /iTrackPeople/eyes:o
 ## Output Example
 
 ```
-0.483 0.276 -0.052
+200 300 -0.052
 ```
 
 Each value corresponds to:
-- **u**: normalized horizontal position (0–1)
-- **v**: normalized vertical position (0–1)
+- **u**: horozontal pixel estimate (0 -> 640)
+- **v**: vertical pixel estimate (0 -> 480)
 - **z**: estimated depth (relative from MediaPipe)
 
 ---

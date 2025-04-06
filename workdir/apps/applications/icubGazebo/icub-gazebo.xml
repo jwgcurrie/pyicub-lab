@@ -86,6 +86,19 @@
         <node>$ENV{ICUBSRV_NODE}</node>
     </module>
 
+    <module>
+    <name>opencv_grabber</name>
+    <parameters></parameters> 
+    <node>$ENV{ICUBSRV_NODE}</node>
+    </module>
+
+    <connection>
+        <from>/grabber</from>   <!-- instead of /grabber/image:o -->
+        <to>/imageview</to>
+        <protocol>tcp</protocol>
+    </connection>
+
+
     <connection>
         <from>/icubSim/cam/right/rgbImage:o</from>
         <to>/imageview</to>

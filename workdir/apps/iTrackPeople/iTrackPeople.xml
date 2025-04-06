@@ -1,0 +1,18 @@
+<application>
+    <name>iTrackPeople</name>
+
+    <module>
+        <name>iTrackPeople</name>
+        <node>localhost</node>
+        <command>python3 apps/iTrackPeople/iTrackPeople.py</command>
+        <parameters>--display</parameters>
+        <workingdir>/workdir/apps/iTrackPeople</workingdir>
+    </module>
+
+    <!-- Optional: connect camera -->
+    <connection>
+        <from>/grabber</from>
+        <to>/iTrackPeople/image:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+</application>

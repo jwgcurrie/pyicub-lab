@@ -1,15 +1,17 @@
 # iTrackPeople
 
-**`iTrackPeople.py`** is a YARP-compatible module that detects the **midpoint between a person’s eyes** in real-time using [MediaPipe Pose](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker). The midpoint coordinates are published over a YARP Bottle port and can optionally be visualized using OpenCV.
+**`iTrackPeople.py`** is a YARP-compatible perception module that detects the **midpoint between a person’s eyes** in real-time using [MediaPipe Pose](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker). The midpoint coordinates are published over YARP Bottle ports in both **2D pixel space** and **3D real-world space** using iCub’s internal coordinate frame via `iKinGazeCtrl`.
 
 ---
 
 ## Features
 
-- Real-time processing from YARP image stream (e.g. `/grabber`)
-- Computes and publishes **(u, v, z)** coordinates of the midpoint between the eyes
+- Real-time processing from a YARP image stream (e.g. `/grabber`)
+- Computes and publishes:
+  - **2D pixel midpoint** between the eyes
+  - **3D head position** using RPC call `get 3D mono` from `/iKinGazeCtrl/rpc`
 - Optional OpenCV visualization with red dot overlay
-- Pluggable into existing iCub/YARP applications
+- Fully pluggable into iCub/YARP pipelines
 
 ---
 
@@ -17,8 +19,9 @@
 
 | Port | Type | Description |
 |------|------|-------------|
-| `/iTrackPeople/image:i` | `yarp.ImageRgb` | Input image (typically from `/grabber`) |
-| `/iTrackPeople/eyes:o`  | `yarp.Bottle`   | Output of `(u, v, z)` as (int, int float) — the midpoint between the eyes |
+| `/iTrackPeople/image:i`   | `yarp.ImageRgb` | Input image (typically from `/grabber`) |
+| `/iTrackPeople/eyes:o`    | `yarp.Bottle`   | Midpoint in 2D pixel space: `(u, v)` |
+| `/iTrackPeople/head3D:o`  | `yarp.Bottle`   | 3D position in iCub’s reference frame: `(x, y, z)` in **meters** |
 
 ---
 
@@ -58,30 +61,34 @@ Then connect your camera/image source:
 yarp connect /grabber /iTrackPeople/image:i
 ```
 
-Read the output:
+And read the outputs:
 
 ```bash
 yarp read /anyname --from /iTrackPeople/eyes:o
+yarp read /anyname --from /iTrackPeople/head3D:o
 ```
 
 ---
 
-## Output Example
+## Output Examples
 
+**2D Pixel Output (`/iTrackPeople/eyes:o`)**:
 ```
-200 300 -0.052
+327 198
 ```
 
-Each value corresponds to:
-- **u**: horozontal pixel estimate (0 -> 640)
-- **v**: vertical pixel estimate (0 -> 480)
-- **z**: estimated depth (relative from MediaPipe)
+**3D Head Position (`/iTrackPeople/head3D:o`)**:
+```
+0.009 0.933 0.979
+```
+
+Each 3D coordinate is in **meters**, relative to iCub’s internal reference frame.
 
 ---
 
-## 🚼 Notes
+## Notes
 
-- Only outputs values when both eyes and nose are visible (confidence > 0.5)
-- Uses `model_complexity=1` for MediaPipe by default
-- Add your own frame-skip or FPS control if needed for performance
-
+- 3D position is retrieved via `get 3D mono ('left' u v 1.0)` from `/iKinGazeCtrl/rpc`
+- Uses a fixed depth of 1.0m for mono back-projection
+- Only outputs values when both eyes are confidently detected (visibility > 0.5)
+- Uses `model_complexity=1` for MediaPipe Pose
